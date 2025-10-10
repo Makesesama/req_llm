@@ -1049,33 +1049,8 @@ defmodule ReqLLM.Providers.Google do
     end)
   end
 
-  # Handle OpenAI-format image_url with atom keys (from encoded file/image content)
+  # Handle OpenAI-format image_url (from Provider.Defaults.encode_openai_content_part)
   defp convert_content_part(%{type: "image_url", image_url: %{url: url}}) when is_binary(url) do
-    # Parse data URI format: data:mime/type;base64,<data>
-    case String.split(url, ",", parts: 2) do
-      [header, base64_data] ->
-        mime_type =
-          case Regex.run(~r/data:([^;]+)/, header) do
-            [_, type] -> type
-            _ -> "image/jpeg"
-          end
-
-        %{
-          inline_data: %{
-            mime_type: mime_type,
-            data: base64_data
-          }
-        }
-
-      _ ->
-        # Not a data URI, might be a URL
-        %{text: "[Unsupported image URL]"}
-    end
-  end
-
-  # Handle OpenAI-format image_url with string keys
-  defp convert_content_part(%{"type" => "image_url", "image_url" => %{"url" => url}})
-       when is_binary(url) do
     # Parse data URI format: data:mime/type;base64,<data>
     case String.split(url, ",", parts: 2) do
       [header, base64_data] ->
