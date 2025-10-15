@@ -41,35 +41,24 @@ defmodule ReqLLM.Providers.OpenAI.ChatAPI do
 
   import ReqLLM.Provider.Utils, only: [maybe_put: 3]
 
+  require ReqLLM.Debug, as: Debug
+
   @impl true
   def path, do: "/chat/completions"
 
   @impl true
   def encode_body(request) do
-    request = ReqLLM.Provider.Defaults.default_encode_body(request)
-    body = Jason.decode!(request.body)
+    context = request.options[:context]
+    model_name = request.options[:model]
+    operation = request.options[:operation] || :chat
+    opts = if is_map(request.options), do: Map.to_list(request.options), else: request.options
 
-    enhanced_body =
-      case request.options[:operation] do
-        :embedding ->
-          add_embedding_options(body, request.options)
+    enhanced_body = build_request_body(context, model_name, opts, operation)
 
-        _ ->
-          body
-          |> add_token_limits(request.options[:model], request.options)
-          |> add_stream_options(request.options)
-          |> add_reasoning_effort(request.options)
-          |> add_response_format(request.options)
-          |> add_parallel_tool_calls(request.options)
-          |> translate_tool_choice_format()
-          |> add_strict_to_tools()
-      end
-
-    if System.get_env("REQ_LLM_DEBUG") in ["1", "true"] do
-      require Logger
-
-      Logger.debug("OpenAI ChatAPI request body: #{Jason.encode!(enhanced_body, pretty: true)}")
-    end
+    Debug.dbug(
+      fn -> "OpenAI ChatAPI request body: #{Jason.encode!(enhanced_body, pretty: true)}" end,
+      component: :provider
+    )
 
     Map.put(request, :body, Jason.encode!(enhanced_body))
   end
@@ -84,60 +73,80 @@ defmodule ReqLLM.Providers.OpenAI.ChatAPI do
     ReqLLM.Provider.Defaults.default_decode_sse_event(event, model)
   end
 
-  @impl true
-  def attach_stream(model, context, opts, _finch_name) do
+  # ========================================================================
+  # Shared Request Building Helpers (used by both Req and Finch paths)
+  # ========================================================================
+
+  defp build_request_headers(model, opts) do
     api_key = ReqLLM.Keys.get!(model, opts)
 
-    headers = [
+    [
       {"Authorization", "Bearer " <> api_key},
-      {"Content-Type", "application/json"},
-      {"Accept", "text/event-stream"}
+      {"Content-Type", "application/json"}
     ]
+  end
 
-    url =
-      case Keyword.get(opts, :base_url) do
-        nil -> ReqLLM.Providers.OpenAI.default_base_url() <> path()
-        base_url -> "#{base_url}#{path()}"
-      end
-
-    provider_opts = opts |> Keyword.get(:provider_options, []) |> Map.new()
-
-    cleaned_opts =
-      opts
-      |> Keyword.delete(:finch_name)
-      |> Keyword.delete(:compiled_schema)
-      |> Keyword.delete(:provider_options)
-
-    req_opts =
-      [
-        model: model.model,
-        context: context,
-        stream: true,
-        provider_options: provider_opts
-      ] ++ cleaned_opts
-
-    options =
-      req_opts
-      |> Enum.reduce(%{}, fn
-        {key, value}, acc when is_list(value) ->
-          Map.put(acc, key, Map.new(value))
-
-        {key, value}, acc ->
-          Map.put(acc, key, value)
-      end)
-
+  defp build_request_body(context, model_name, opts, operation \\ :chat) do
+    # Use default encoding first
     temp_request = %Req.Request{
       method: :post,
       url: URI.parse("https://example.com/temp"),
       headers: %{},
       body: {:json, %{}},
-      options: options
+      options: Map.new([model: model_name, context: context, operation: operation] ++ opts)
     }
 
-    encoded_request = encode_body(temp_request)
-    body = encoded_request.body
+    request = ReqLLM.Provider.Defaults.default_encode_body(temp_request)
 
-    {:ok, Finch.build(:post, url, headers, body)}
+    body =
+      case request.body do
+        "" -> %{}
+        json_string when is_binary(json_string) -> Jason.decode!(json_string)
+      end
+
+    # Convert opts to map for helper functions that expect request.options
+    opts_map = if is_list(opts), do: Map.new(opts), else: opts
+
+    # Apply ChatAPI-specific enhancements
+    case operation do
+      :embedding ->
+        add_embedding_options(body, opts_map)
+
+      _ ->
+        body
+        |> add_token_limits(model_name, opts_map)
+        |> add_stream_options(opts_map)
+        |> add_reasoning_effort(opts_map)
+        |> add_response_format(opts_map)
+        |> add_parallel_tool_calls(opts_map)
+        |> translate_tool_choice_format()
+        |> add_strict_to_tools()
+    end
+  end
+
+  defp build_request_url(opts) do
+    case Keyword.get(opts, :base_url) do
+      nil -> ReqLLM.Providers.OpenAI.default_base_url() <> path()
+      base_url -> "#{base_url}#{path()}"
+    end
+  end
+
+  # ========================================================================
+
+  @impl true
+  def attach_stream(model, context, opts, _finch_name) do
+    headers = build_request_headers(model, opts) ++ [{"Accept", "text/event-stream"}]
+
+    cleaned_opts =
+      opts
+      |> Keyword.delete(:finch_name)
+      |> Keyword.delete(:compiled_schema)
+      |> Keyword.put(:stream, true)
+
+    body = build_request_body(context, model.model, cleaned_opts)
+    url = build_request_url(opts)
+
+    {:ok, Finch.build(:post, url, headers, Jason.encode!(body))}
   rescue
     error ->
       {:error,
@@ -259,9 +268,13 @@ defmodule ReqLLM.Providers.OpenAI.ChatAPI do
           if function && (function[:strict] || function["strict"]) do
             function_with_strict =
               if is_map_key(tool, :function) do
-                Map.put(function, :strict, true)
+                function
+                |> Map.put(:strict, true)
+                |> ensure_all_properties_required()
               else
-                Map.put(function, "strict", true)
+                function
+                |> Map.put("strict", true)
+                |> ensure_all_properties_required()
               end
 
             if is_map_key(tool, :function) do
@@ -281,6 +294,39 @@ defmodule ReqLLM.Providers.OpenAI.ChatAPI do
       end
     else
       body
+    end
+  end
+
+  defp ensure_all_properties_required(function) do
+    params = function[:parameters] || function["parameters"]
+
+    if params do
+      properties = params[:properties] || params["properties"]
+
+      if properties && is_map(properties) do
+        all_property_names = Map.keys(properties)
+
+        updated_params =
+          if is_map_key(params, :properties) do
+            params
+            |> Map.put(:required, all_property_names)
+            |> Map.put(:additionalProperties, false)
+          else
+            params
+            |> Map.put("required", Enum.map(all_property_names, &to_string/1))
+            |> Map.put("additionalProperties", false)
+          end
+
+        if is_map_key(function, :parameters) do
+          Map.put(function, :parameters, updated_params)
+        else
+          Map.put(function, "parameters", updated_params)
+        end
+      else
+        function
+      end
+    else
+      function
     end
   end
 end

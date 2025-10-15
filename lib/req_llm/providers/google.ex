@@ -292,10 +292,15 @@ defmodule ReqLLM.Providers.Google do
 
   defp normalize_google_usage(usage_metadata) do
     input = Map.get(usage_metadata, "promptTokenCount", 0)
-    output = Map.get(usage_metadata, "candidatesTokenCount", 0)
     total = Map.get(usage_metadata, "totalTokenCount", 0)
     cached = Map.get(usage_metadata, "cachedContentTokenCount", 0)
     reasoning = Map.get(usage_metadata, "thoughtsTokenCount", 0)
+
+    output =
+      case Map.get(usage_metadata, "candidatesTokenCount") do
+        nil -> max(0, total - input - reasoning)
+        count -> count
+      end
 
     %{
       input_tokens: input,
@@ -494,9 +499,13 @@ defmodule ReqLLM.Providers.Google do
 
     compiled_schema =
       case request.options do
-        opts when is_map(opts) -> Map.fetch!(opts, :compiled_schema)
-        opts when is_list(opts) -> Keyword.fetch!(opts, :compiled_schema)
+        opts when is_map(opts) -> Map.get(opts, :compiled_schema)
+        opts when is_list(opts) -> Keyword.get(opts, :compiled_schema)
       end
+
+    if !compiled_schema do
+      raise ArgumentError, "Missing :compiled_schema in request options for :object operation"
+    end
 
     model_name = request.options[:model]
 
@@ -544,6 +553,7 @@ defmodule ReqLLM.Providers.Google do
 
   defp convert_to_google_schema(schema) when is_map(schema) do
     schema
+    |> Map.delete("additionalProperties")
     |> Map.new(fn {key, value} ->
       case key do
         "type" -> {"type", to_google_type(value)}
@@ -639,10 +649,17 @@ defmodule ReqLLM.Providers.Google do
             {:ok, response} =
               ReqLLM.Provider.Defaults.decode_response_body_openai_format(openai_format, model)
 
+            # Extract and set object from JSON text content (like OpenAI json_schema mode)
+            response_with_object =
+              case ReqLLM.Response.unwrap_object(response) do
+                {:ok, object} -> %{response | object: object}
+                {:error, _} -> response
+              end
+
             merged_response =
               ReqLLM.Context.merge_response(
                 req.options[:context] || %ReqLLM.Context{messages: []},
-                response
+                response_with_object
               )
 
             {req, %{resp | body: merged_response}}
@@ -784,21 +801,12 @@ defmodule ReqLLM.Providers.Google do
             |> Enum.filter(&Map.has_key?(&1, "text"))
             |> Enum.map_join("", & &1["text"])
 
-          parsed_json =
-            case Jason.decode(json_text) do
-              {:ok, json} -> json
-              {:error, _} -> %{}
-            end
-
+          # Return as text content (like OpenAI json_schema mode)
+          # ReqLLM.Response.unwrap_object will parse the JSON
           %{
             "message" => %{
               "role" => "assistant",
-              "content" => [
-                %{
-                  "type" => "object",
-                  "object" => parsed_json
-                }
-              ]
+              "content" => json_text
             },
             "finish_reason" => normalize_google_finish_reason(candidate["finishReason"])
           }
@@ -885,6 +893,44 @@ defmodule ReqLLM.Providers.Google do
   defp convert_google_usage(_),
     do: %{"prompt_tokens" => 0, "completion_tokens" => 0, "total_tokens" => 0}
 
+  defp build_request_headers(_model, _opts), do: [{"Content-Type", "application/json"}]
+
+  defp build_request_url(model_name, opts) do
+    api_key = ReqLLM.Keys.get!(opts[:model_struct] || opts[:model], opts)
+    base_url = Keyword.get(opts, :base_url, default_base_url())
+
+    "#{base_url}/models/#{model_name}:streamGenerateContent?key=#{api_key}&alt=sse"
+  end
+
+  defp build_request_body(model, context, opts) do
+    operation = Keyword.get(opts, :operation, :chat)
+    compiled_schema = Keyword.get(opts, :compiled_schema)
+
+    base_options =
+      [
+        model: model.model,
+        context: context,
+        stream: true,
+        operation: operation
+      ]
+      |> then(fn opts ->
+        if compiled_schema, do: Keyword.put(opts, :compiled_schema, compiled_schema), else: opts
+      end)
+
+    all_options = Keyword.merge(base_options, Keyword.delete(opts, :finch_name))
+
+    temp_request = %Req.Request{
+      method: :post,
+      url: URI.parse("https://example.com/temp"),
+      headers: %{},
+      body: {:json, %{}},
+      options: Map.new(all_options)
+    }
+
+    encoded_request = encode_body(temp_request)
+    encoded_request.body
+  end
+
   @impl ReqLLM.Provider
   def attach_stream(model, context, opts, _finch_name) do
     req_only_keys = [:params, :model, :base_url, :finch_name, :fixture]
@@ -895,16 +941,13 @@ defmodule ReqLLM.Providers.Google do
 
     with {:ok, processed_opts} <-
            ReqLLM.Provider.Options.process(__MODULE__, operation, model, opts_to_process) do
-      api_key = ReqLLM.Keys.get!(model, opts)
       base_url = Keyword.get(req_opts, :base_url, default_base_url())
 
-      body = build_google_streaming_body(model, context, processed_opts)
+      opts_with_base = Keyword.merge(processed_opts, base_url: base_url, model_struct: model)
 
-      url = "#{base_url}/models/#{model.model}:streamGenerateContent?key=#{api_key}"
-
-      headers = [
-        {"Content-Type", "application/json"}
-      ]
+      headers = build_request_headers(model, opts_with_base) ++ [{"Accept", "text/event-stream"}]
+      url = build_request_url(model.model, opts_with_base)
+      body = build_request_body(model, context, processed_opts)
 
       finch_request = Finch.build(:post, url, headers, body)
       {:ok, finch_request}
@@ -915,29 +958,6 @@ defmodule ReqLLM.Providers.Google do
        ReqLLM.Error.API.Request.exception(
          reason: "Failed to build Google stream request: #{inspect(error)}"
        )}
-  end
-
-  defp build_google_streaming_body(model, context, opts) do
-    operation = Keyword.get(opts, :operation, :chat)
-
-    temp_request = %Req.Request{
-      method: :post,
-      url: URI.parse("https://example.com/temp"),
-      headers: %{},
-      body: {:json, %{}},
-      options:
-        Map.new(
-          [
-            model: model.model,
-            context: context,
-            stream: true,
-            operation: operation
-          ] ++ Keyword.delete(opts, :finch_name)
-        )
-    }
-
-    encoded_request = encode_body(temp_request)
-    encoded_request.body
   end
 
   @impl ReqLLM.Provider
@@ -980,10 +1000,8 @@ defmodule ReqLLM.Providers.Google do
     {system_instruction, contents}
   end
 
-  # Helper to convert OpenAI-style messages to Gemini format (non-system messages only)
   defp convert_messages_to_gemini(messages) do
     Enum.map(messages, fn message ->
-      # Extract role from either map with string keys or struct
       raw_role =
         case message do
           %{role: role} -> role
@@ -991,20 +1009,20 @@ defmodule ReqLLM.Providers.Google do
           _ -> "user"
         end
 
-      # Convert role to Gemini format
       role =
         case raw_role do
           :user -> "user"
           "user" -> "user"
           :assistant -> "model"
           "assistant" -> "model"
+          :tool -> "user"
+          "tool" -> "user"
           :system -> "user"
           "system" -> "user"
           other when is_binary(other) -> other
           other -> to_string(other)
         end
 
-      # Extract content from either map with string keys or struct
       raw_content =
         case message do
           %{content: content} -> content
@@ -1012,15 +1030,87 @@ defmodule ReqLLM.Providers.Google do
           _ -> ""
         end
 
-      parts =
+      content_parts =
         case raw_content do
           content when is_binary(content) -> [%{text: content}]
           parts when is_list(parts) -> Enum.map(parts, &convert_content_part/1)
         end
 
+      tool_call_parts =
+        case message do
+          %{"tool_calls" => tool_calls} when is_list(tool_calls) ->
+            Enum.map(tool_calls, &convert_tool_call_to_function_call/1)
+
+          %{tool_calls: tool_calls} when is_list(tool_calls) ->
+            Enum.map(tool_calls, &convert_tool_call_to_function_call/1)
+
+          _ ->
+            []
+        end
+
+      tool_result_parts =
+        case message do
+          %{"tool_call_id" => _call_id, "role" => "tool"} ->
+            [
+              %{
+                functionResponse: %{
+                  name: "unknown",
+                  response: %{content: extract_content_text(raw_content)}
+                }
+              }
+            ]
+
+          %{tool_call_id: _call_id, role: :tool} ->
+            [
+              %{
+                functionResponse: %{
+                  name: "unknown",
+                  response: %{content: extract_content_text(raw_content)}
+                }
+              }
+            ]
+
+          _ ->
+            []
+        end
+
+      parts = content_parts ++ tool_call_parts ++ tool_result_parts
+
       %{role: role, parts: parts}
     end)
   end
+
+  defp convert_tool_call_to_function_call(%{
+         "type" => "function",
+         "function" => %{"name" => name, "arguments" => args},
+         "id" => id
+       }) do
+    %{functionCall: %{name: name, args: Jason.decode!(args), id: id}}
+  end
+
+  defp convert_tool_call_to_function_call(%{
+         type: "function",
+         function: %{name: name, arguments: args},
+         id: id
+       }) do
+    %{functionCall: %{name: name, args: Jason.decode!(args), id: id}}
+  end
+
+  defp convert_tool_call_to_function_call(_), do: nil
+
+  defp extract_content_text(content) when is_binary(content), do: content
+
+  defp extract_content_text(parts) when is_list(parts) do
+    parts
+    |> Enum.map_join("", fn
+      %{"type" => "text", "text" => text} -> text
+      %{type: :text, text: text} -> text
+      text when is_binary(text) -> text
+      _ -> ""
+    end)
+  end
+
+  defp extract_content_text(_), do: ""
 
   # Extract text content from a message for system instruction
   defp extract_text_content(%{content: content}) when is_binary(content), do: content

@@ -40,39 +40,38 @@
           "index": 0,
           "logprobs": null,
           "message": {
-            "content": "Hello, world! Nice to meet you. If you're testing code or just saying hi, I'm Grok, ready to assist with anything from cosmic queries to coding conundrums. What's on your mind? 🚀",
-            "reasoning": "First, the user said \"Hello world!\" This is a simple greeting, often used in programming as the first program output.\n\n\n## Greeting the User  \n- The user started with \"Hello world!\"—a classic greeting often used as the first output in programming.",
+            "content": "Hello, world! Nice to meet you. If you're testing code or just saying hi, I'm Grok, ready to assist with whatever's next. What's on your mind? 🚀",
+            "reasoning": "First, the user said \"Hello world!\" This is a simple greeting, often used in programming as the first program.\n\n\n## Greeting the user  \n- The user started with \"Hello world!\", a classic greeting often used in programming tutorials.",
             "reasoning_details": [
               {
-                "format": "unknown",
+                "format": "xai-responses-v1",
                 "index": 0,
-                "text": "First, the user said \"Hello world!\" This is a simple greeting, often used in programming as the first program output.\n\n\n## Greeting the User  \n- The user started with \"Hello world!\"—a classic greeting often used as the first output in programming.",
-                "type": "reasoning.text"
+                "summary": "First, the user said \"Hello world!\" This is a simple greeting, often used in programming as the first program.\n\n\n## Greeting the user  \n- The user started with \"Hello world!\", a classic greeting often used in programming tutorials.",
+                "type": "reasoning.summary"
+              },
+              {
+                "data": "QfFVM2naUXRWnam+6iaSTdNJ2ANQIb2souiMLYtw+/NTusLVHXbnZ8ErdyDOyBijDWdKepAJbHu+DHK5QAJpVD+kmSDEnHTg4xocBht2Tb3pgbjYA/Oa/EhA4aMtUI5naSuUMdcwD2b7tXIVP9boz9BIYY3n0r18eSFmu/RnRNfv8jkTv+78CSZAPJFe9pTNks5OdvgtIVAlvxA8M9D9M1KB7LIYY6zt4CkEpMxUipsPI8q6B5EnxBH7EL7If1/wm1372jFes12axoRN00ycCVNfqwhgddrNcBglP34NpKAcIX/07O3Hu8+ucOK+81OBMcev4tSCNehNnNZ2tmIpGalfr2IsS8aCMRBnMnIlS76g8g8c0UwrB9wAwV42iaQK1mC+oi/O/zNE/G9Kij/XSMZtwTA37KIHKdW7I3bXRZHgVfb6avKIVOTgMpNPjVFRz7/n+8H4ok1U4RMYuLfBbklnxg/WwL8UQG86UeqV0fL4KYs864tKhbGpT81wNla8mTUYcZj44WqDneiMBGmCc+ISe30Kaljz81E4FBOGU53XHWiv8gz/qEtCKUp8Bz3A+fMm8Le6w4eqY/jHuWPiU1f1y1YnMzKqiKdEUILwmPsWAplChrsOLlA4pRGYbtt44zgYjTYUtmAfYJhzLSrm65Mks+QLyhyRGAavkFRk0hm3mTeE2BHJ4UdRtv2R7f+qsuKrgHLFnPimukg2K9X/tJ0TL9wRpRXJXwXhAOVZNfm94NyRP3APWWfW8iG8nDkQkHnfMjY7YDcSuzZrMDLMNpj0wq0AsUiOSie431z7dFRzb0+7NVuL+6z1oE07pAkiduBp0kbTMVfItl+sqxTSs4Dlz7ui0bDqsw",
+                "format": "xai-responses-v1",
+                "id": "rs_386cb653-3c18-dd5b-2f3f-26acfc92c681_us-east-1",
+                "index": 0,
+                "type": "reasoning.encrypted"
               }
             ],
             "refusal": null,
             "role": "assistant"
           },
-          "native_finish_reason": "stop"
+          "native_finish_reason": "completed"
         }
       ],
-      "created": 1759845467,
-      "id": "gen-1759845467-3v8ZnQ5Bg36J5eupnwS2",
+      "created": 1760532569,
+      "id": "gen-1760532569-ZGK0bhUdu2WpIncGSJln",
       "model": "x-ai/grok-code-fast-1",
       "object": "chat.completion",
       "provider": "xAI",
-      "system_fingerprint": "fp_10f00c862d",
       "usage": {
-        "completion_tokens": 183,
-        "completion_tokens_details": {
-          "reasoning_tokens": 140
-        },
+        "completion_tokens": 166,
         "prompt_tokens": 207,
-        "prompt_tokens_details": {
-          "audio_tokens": 0,
-          "cached_tokens": 192
-        },
-        "total_tokens": 390
+        "total_tokens": 373
       }
     },
     "headers": {
@@ -80,7 +79,7 @@
         "*"
       ],
       "cf-ray": [
-        "98ade8de7abf60ac-ORD"
+        "98ef6fd25896d836-ORD"
       ],
       "connection": [
         "keep-alive"
@@ -89,7 +88,7 @@
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:57:49 GMT"
+        "Wed, 15 Oct 2025 12:49:30 GMT"
       ],
       "permissions-policy": [
         "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")"

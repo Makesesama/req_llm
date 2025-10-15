@@ -37,14 +37,14 @@
           "finish_reason": "length",
           "index": 0,
           "message": {
-            "content": "### The Emberheart Chronicles: Wings of Destiny\n\nIn the ancient realm of Eldoria, where jagged mountains pierced the clouds and vast forests whispered secrets to the wind, dragons were not mere legends but the guardians of the world's hidden wonders. The skies were their domain, painted with the iridescent scales of these majestic beasts—crimson reds that burned like sunsets, emerald greens that shimmered like hidden gems, and obsidian blacks that blended with the night. But peace in Eldoria was",
+            "content": "### The Emberheart Chronicles: Wings of Destiny\n\nIn the ancient realm of Eldoria, where jagged mountains pierced the clouds and vast forests whispered secrets to the wind, dragons were not mere legends but living guardians of the land. The greatest among them was Ignis, a majestic crimson dragon whose scales gleamed like molten rubies under the sun. Ignis had roamed the skies for centuries, his wings spanning wider than the tallest spires of the elven citadels. But peace in Eld",
             "refusal": null,
             "role": "assistant"
           }
         }
       ],
-      "created": 1759844441,
-      "id": "4c7d6026-5ff9-954e-24ca-dc8bbaf58871_us-east-1",
+      "created": 1760471272,
+      "id": "e34af6ec-e6a8-9354-aea7-fbeaf428227b_us-east-1",
       "model": "grok-4-fast-non-reasoning",
       "object": "chat.completion",
       "system_fingerprint": "fp_e7507192a3",
@@ -57,14 +57,14 @@
           "rejected_prediction_tokens": 0
         },
         "num_sources_used": 0,
-        "prompt_tokens": 138,
+        "prompt_tokens": 177,
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 122,
+          "cached_tokens": 161,
           "image_tokens": 0,
-          "text_tokens": 138
+          "text_tokens": 177
         },
-        "total_tokens": 238
+        "total_tokens": 277
       }
     },
     "headers": {
@@ -78,22 +78,28 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98adcfcc49eb803a-ORD"
+        "98e9974caf14b947-ORD"
       ],
       "connection": [
         "keep-alive"
+      ],
+      "content-security-policy-report-only": [
+        "script-src 'none'; connect-src 'none'; report-uri https://csp-reporting.cloudflare.com/cdn-cgi/script_monitor/report?m=YYSSMYK_Z5k5HHteGcPzSpC54Rry470wp89Dkp7LEYU-1760471274-1.0.1.1-CNpzHCQNipo0_Fpg86tFYIb.9TgbSzQbdiFmtB5RNNKpQM2_zLhtXv40mPwQmDsHmvuEgKictvUtRfKPIBixjEJqbtp63YIxO1qd76bySZOe7UGjPV2du6fLULNR00Km9VWpPoz1SP7GLpV6mq8CtCXHZZBzl8.YE6bpma9GiI8; report-to cf-csp-endpoint"
       ],
       "content-type": [
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:40:41 GMT"
+        "Tue, 14 Oct 2025 19:47:54 GMT"
+      ],
+      "report-to": [
+        "{\"endpoints\":[{\"url\":\"https:\\/\\/csp-reporting.cloudflare.com\\/cdn-cgi\\/script_monitor\\/report?m=YYSSMYK_Z5k5HHteGcPzSpC54Rry470wp89Dkp7LEYU-1760471274-1.0.1.1-CNpzHCQNipo0_Fpg86tFYIb.9TgbSzQbdiFmtB5RNNKpQM2_zLhtXv40mPwQmDsHmvuEgKictvUtRfKPIBixjEJqbtp63YIxO1qd76bySZOe7UGjPV2du6fLULNR00Km9VWpPoz1SP7GLpV6mq8CtCXHZZBzl8.YE6bpma9GiI8\"}],\"group\":\"cf-csp-endpoint\",\"max_age\":86400}"
       ],
       "server": [
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=0J5sx.qqYA9Bw9NEzldEQgDQUQLF4mopaP3jZTlhfNI-1759844441-1.0.1.1-UPdstpafoAFmHf.BTX11jbs0m.1jlemSrTkN_ZGfBu_qaJPw_i6R7IZ7WAqH_wvTWleDSM1evlRmITQIbyEdT3qLaj2Qg6mCBcZVh4lUJ08; path=/; expires=Tue, 07-Oct-25 14:10:41 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=go8Jt0w4GTTADUa.N6rh6LwgJ2HCdFWtem0Qloje74w-1760471274-1.0.1.1-tEtoEPjoi.16NwZSZO5IZAL9orqiA5ogtqE1kkqowIBTTfRAzVNZAmEDZl53wjb9ETAN7B_Gooo5oo9EWk3FLdQBtEI5SbMT_y_gRK96P7o; path=/; expires=Tue, 14-Oct-25 20:17:54 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000"
@@ -105,7 +111,7 @@
         "origin, access-control-request-method, access-control-request-headers"
       ],
       "x-request-id": [
-        "00-2f0a977d121690f021901460f4c31ac5-943db6de001d9a30-01"
+        "00-8ba73040c2adb268d2f1986be37b2863-2743ac44005ad6e8-01"
       ],
       "x-zero-data-retention": [
         "false"

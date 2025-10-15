@@ -37,14 +37,14 @@
           "finish_reason": "length",
           "index": 0,
           "message": {
-            "content": "In the ancient realm of Eldoria, where the sky was perpetually painted with hues of twilight and the land was a tapestry of verdant forests, towering mountains, and sprawling deserts, dragons were not merely creatures of legend but majestic beings integral to the fabric of the world. This is the tale of an adventure that spanned generations, involving dragons, heroes, and the quest for a legendary artifact known as the Dragonheart Crystal.\n\nOur story begins in the small village of Windale, nestled at the edge of",
+            "content": "Once upon a time, in a realm far beyond the reach of ordinary maps, there existed a land known as Draconia, where the sky was often painted with the silhouettes of majestic dragons. This land was a tapestry of towering mountains, deep forests, and vast plains, each teeming with its own mysteries and adventures. The inhabitants of Draconia, a mix of humans, elves, dwarves, and other mystical beings, lived in harmony with these powerful creatures, understanding that dragons were not merely",
             "refusal": null,
             "role": "assistant"
           }
         }
       ],
-      "created": 1759844450,
-      "id": "165962f2-2a73-5391-3efe-24fcb2d85ad6_us-east-1",
+      "created": 1760471274,
+      "id": "d620ab59-1f7d-9630-8c1f-a1a1677768a0_us-east-1",
       "model": "grok-2-vision-1212",
       "object": "chat.completion",
       "system_fingerprint": "fp_236db45c03",
@@ -78,22 +78,28 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98add0079caee544-ORD"
+        "98e9975abe00eaf9-ORD"
       ],
       "connection": [
         "keep-alive"
+      ],
+      "content-security-policy-report-only": [
+        "script-src 'none'; connect-src 'none'; report-uri https://csp-reporting.cloudflare.com/cdn-cgi/script_monitor/report?m=pAJ5Jh62S0Ow1XySyR_jniJgbPVBAHeb7t4DgAglBsY-1760471277-1.0.1.1-gpCevAG0tCb89o1Fyj_DdAXEWB6q4RtmA1j0UW3L_umAR_6QzX5YjloJ7fIuPKXIdKZSpF0Fr29b1oEiQ6qE7ec80QSMJ3fyUcb.Wye4aiI_woO6oSMKQbBJQ_jnOxLlqX6ISFw084I.7USqIduiYUPS2cUVVXQwyuuWFnUnUzc; report-to cf-csp-endpoint"
       ],
       "content-type": [
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:40:51 GMT"
+        "Tue, 14 Oct 2025 19:47:57 GMT"
+      ],
+      "report-to": [
+        "{\"endpoints\":[{\"url\":\"https:\\/\\/csp-reporting.cloudflare.com\\/cdn-cgi\\/script_monitor\\/report?m=pAJ5Jh62S0Ow1XySyR_jniJgbPVBAHeb7t4DgAglBsY-1760471277-1.0.1.1-gpCevAG0tCb89o1Fyj_DdAXEWB6q4RtmA1j0UW3L_umAR_6QzX5YjloJ7fIuPKXIdKZSpF0Fr29b1oEiQ6qE7ec80QSMJ3fyUcb.Wye4aiI_woO6oSMKQbBJQ_jnOxLlqX6ISFw084I.7USqIduiYUPS2cUVVXQwyuuWFnUnUzc\"}],\"group\":\"cf-csp-endpoint\",\"max_age\":86400}"
       ],
       "server": [
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=j1kcxc1aQbs049t6Z1zAHSTbGL6FLi_sUjxDUAoMaZY-1759844451-1.0.1.1-Hi0a5NKIfp5VjVZzvzxqp2drbNZMg.ePQEukc5GyMl3mUWm.s9sE7ClgZ7nRyx.TT2IDjlHrC2iR4d29zzJxfFZ7doIqb9XhXkXCTEsjfts; path=/; expires=Tue, 07-Oct-25 14:10:51 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=Dm0FM0DSpvtOfK6VH5tMKfFBe1h1.qdVUVLYC.OgrUc-1760471277-1.0.1.1-szq6.FCcej96AKiE6lwTG1YTp.HYja4TO93XYk0i1zsK7.1VtIhO1ooD3c6YPF.buaqBll09BVcV0b3kYNm.8jfwTrNqn6qSeKpRl_v6WZg; path=/; expires=Tue, 14-Oct-25 20:17:57 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000"
@@ -105,7 +111,7 @@
         "origin, access-control-request-method, access-control-request-headers"
       ],
       "x-request-id": [
-        "00-6e2d2b84d94d4d2297851081be61ee23-f6f34a20001906db-01"
+        "00-b3dc445b0a779b906de8fa875258c34b-ec01deb30068df17-01"
       ],
       "x-zero-data-retention": [
         "false"

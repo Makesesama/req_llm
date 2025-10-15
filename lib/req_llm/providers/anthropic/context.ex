@@ -7,27 +7,32 @@ defmodule ReqLLM.Providers.Anthropic.Context do
   ## Key Differences from OpenAI
 
   - Uses content blocks instead of simple strings
-  - System messages are included in the messages array
-  - Tool calls are represented as content blocks with type "tool"
+  - System messages are extracted to top-level `system` parameter
+  - Tool calls are represented as content blocks with type "tool_use"
+  - Tool results must be in "user" role messages (Anthropic only accepts "user" or "assistant" roles)
   - Different parameter names (stop_sequences vs stop)
 
   ## Message Format
 
       %{
         model: "claude-3-5-sonnet-20241022",
+        system: "You are a helpful assistant",
         messages: [
-          %{role: "system", content: "You are a helpful assistant"},
-          %{role: "user", content: "Hello"},
+          %{role: "user", content: "What's the weather?"},
           %{role: "assistant", content: [
-            %{type: "text", text: "Hello!"},
-            %{type: "tool", id: "call_123", name: "weather", arguments: %{}}
+            %{type: "text", text: "I'll check that for you."},
+            %{type: "tool_use", id: "toolu_123", name: "get_weather", input: %{location: "SF"}}
           ]},
-          %{role: "tool", id: "call_123", content: "sunny"}
+          %{role: "user", content: [
+            %{type: "tool_result", tool_use_id: "toolu_123", content: "72°F and sunny"}
+          ]}
         ],
         max_tokens: 1000,
         temperature: 0.7
       }
   """
+
+  alias ReqLLM.ToolCall
 
   @doc """
   Encode context and model to Anthropic Messages API format.
@@ -64,9 +69,35 @@ defmodule ReqLLM.Providers.Anthropic.Context do
     Map.put(request, :messages, encoded_messages)
   end
 
-  defp encode_message(%ReqLLM.Message{role: role, content: content}) do
+  defp encode_message(%ReqLLM.Message{role: :assistant, tool_calls: tool_calls, content: content})
+       when is_list(tool_calls) and tool_calls != [] do
+    text_blocks = encode_content(content)
+    tool_blocks = Enum.map(tool_calls, &encode_tool_call_to_tool_use/1)
+
     %{
-      role: to_string(role),
+      role: "assistant",
+      content: combine_content_blocks(text_blocks, tool_blocks)
+    }
+  end
+
+  defp encode_message(%ReqLLM.Message{role: :tool, tool_call_id: id, content: content}) do
+    %{
+      role: "user",
+      content: [
+        %{
+          type: "tool_result",
+          tool_use_id: id,
+          content: extract_text_content(content)
+        }
+      ]
+    }
+  end
+
+  defp encode_message(%ReqLLM.Message{role: role, content: content}) do
+    normalized_role = if role == :tool, do: :user, else: role
+
+    %{
+      role: to_string(normalized_role),
       content: encode_content(content)
     }
   end
@@ -89,30 +120,10 @@ defmodule ReqLLM.Providers.Anthropic.Context do
     end
   end
 
+  defp encode_content_part(%ReqLLM.Message.ContentPart{type: :text, text: ""}), do: nil
+
   defp encode_content_part(%ReqLLM.Message.ContentPart{type: :text, text: text}) do
     %{type: "text", text: text}
-  end
-
-  defp encode_content_part(%ReqLLM.Message.ContentPart{
-         type: :tool_call,
-         tool_name: name,
-         input: input,
-         tool_call_id: id
-       }) do
-    %{
-      type: "tool_use",
-      id: id,
-      name: name,
-      input: input
-    }
-  end
-
-  defp encode_content_part(%ReqLLM.Message.ContentPart{
-         type: :tool_result,
-         tool_call_id: _id,
-         output: _output
-       }) do
-    nil
   end
 
   defp encode_content_part(%ReqLLM.Message.ContentPart{
@@ -161,6 +172,32 @@ defmodule ReqLLM.Providers.Anthropic.Context do
   end
 
   defp encode_content_part(_), do: nil
+
+  defp encode_tool_call_to_tool_use(%ToolCall{id: id, function: %{name: name, arguments: args}}) do
+    %{type: "tool_use", id: id, name: name, input: Jason.decode!(args)}
+  end
+
+  defp combine_content_blocks(text_blocks, tool_blocks) when is_list(text_blocks) do
+    text_blocks ++ tool_blocks
+  end
+
+  defp combine_content_blocks("", tool_blocks), do: tool_blocks
+
+  defp combine_content_blocks(text_string, tool_blocks) when is_binary(text_string) do
+    [%{type: "text", text: text_string}] ++ tool_blocks
+  end
+
+  defp extract_text_content(content_parts) when is_list(content_parts) do
+    content_parts
+    |> Enum.find_value(fn
+      %ReqLLM.Message.ContentPart{type: :text, text: text} -> text
+      _ -> nil
+    end)
+    |> case do
+      nil -> ""
+      text -> text
+    end
+  end
 
   defp add_tools(request, []), do: request
 

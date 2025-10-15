@@ -44,8 +44,8 @@
           }
         }
       ],
-      "created": 1759844449,
-      "id": "0717214e-1b65-ad74-8b0a-c6b3c375a438_us-east-1",
+      "created": 1760471290,
+      "id": "26516eec-d7bb-d4a8-253c-d95deeff3060_us-east-1",
       "model": "grok-4-fast-reasoning",
       "object": "chat.completion",
       "system_fingerprint": "fp_9362061f30",
@@ -54,18 +54,18 @@
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
-          "reasoning_tokens": 106,
+          "reasoning_tokens": 145,
           "rejected_prediction_tokens": 0
         },
         "num_sources_used": 0,
-        "prompt_tokens": 120,
+        "prompt_tokens": 159,
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 119,
+          "cached_tokens": 158,
           "image_tokens": 0,
-          "text_tokens": 120
+          "text_tokens": 159
         },
-        "total_tokens": 235
+        "total_tokens": 313
       }
     },
     "headers": {
@@ -79,7 +79,7 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98add0014bcae8ea-ORD"
+        "98e997bebae1253a-ORD"
       ],
       "connection": [
         "keep-alive"
@@ -88,13 +88,13 @@
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:40:50 GMT"
+        "Tue, 14 Oct 2025 19:48:11 GMT"
       ],
       "server": [
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=XkE1r6pd03eNuNHYd4aRQu3R8td0dAQjfWBHEhs7OG8-1759844450-1.0.1.1-iuxh3J8OlyrXv0gCxSWJP2jkUiSWCj12cYUz4v_F282uBb89oKe7VRdpUpEXsPQuC_TUKmt7L3QSqRiM3RWdpC.doqCQLkxHhOjyD2BB1W4; path=/; expires=Tue, 07-Oct-25 14:10:50 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=FTxK0nmVmVQA5q2H_.WJzjqTVCAIwmlPtagWeIwINVU-1760471291-1.0.1.1-ahfLb1B5gHuAg3veBAcRpFcCuvqpYMsosxWDU4y72SH50qKvtezcY7GDLIVTNfiFapctYoTG2nJ1MuLyHn4YjGl8fsmhbV61_skaqrBWmeo; path=/; expires=Tue, 14-Oct-25 20:18:11 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000"
@@ -106,7 +106,7 @@
         "origin, access-control-request-method, access-control-request-headers"
       ],
       "x-request-id": [
-        "00-61d9df058a99ce32f3a51302aaa980be-6c6aaad300191106-01"
+        "00-138b7ba03cc49e7c6b3335d7cfbe48a0-ba6d5ed4005ab337-01"
       ],
       "x-zero-data-retention": [
         "false"

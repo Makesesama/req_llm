@@ -37,17 +37,17 @@
           "finish_reason": "length",
           "index": 0,
           "message": {
-            "content": "**The Chronicles of Aetharion: The Dragon's Legacy**\n\nIn the ancient realm of Aetharion, where jagged mountains pierced the heavens and vast, untamed forests whispered secrets of old, dragons were more than mere myth—they were the guardians of the world's balance. Their scales shimmered like molten gold and sapphire, their eyes burned with the wisdom of millennia, and their roars could shake the very earth. But as the ages passed, the bond between dragons and mortals frayed,",
+            "content": "**The Chronicles of Aetherflame: A Dragon's Legacy**\n\nIn the ancient realm of Eryndralis, where the sky shimmered with hues of molten gold and sapphire, dragons were not mere myths but living legends. They soared above jagged peaks, their scales glinting like precious gems under the twin suns of dawn and dusk. Among them, the mightiest were the Aetherflame dragons, a lineage of fire-wielded beasts whose breath could melt stone and whose wisdom rivaled",
             "refusal": null,
             "role": "assistant"
           }
         }
       ],
-      "created": 1759844457,
-      "id": "43e857b6-a623-896d-bc8b-e6736cf06e6d_us-east-1",
+      "created": 1760471277,
+      "id": "34320ca5-f3c7-1149-c78f-6f5c4821193b_us-east-1",
       "model": "grok-3",
       "object": "chat.completion",
-      "system_fingerprint": "fp_f02e6df795",
+      "system_fingerprint": "fp_301fb74d4b",
       "usage": {
         "completion_tokens": 100,
         "completion_tokens_details": {
@@ -60,7 +60,7 @@
         "prompt_tokens": 15,
         "prompt_tokens_details": {
           "audio_tokens": 0,
-          "cached_tokens": 14,
+          "cached_tokens": 2,
           "image_tokens": 0,
           "text_tokens": 15
         },
@@ -78,7 +78,7 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98add035ad72cca3-ORD"
+        "98e9976c6eb1e245-ORD"
       ],
       "connection": [
         "keep-alive"
@@ -87,13 +87,13 @@
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:41:04 GMT"
+        "Tue, 14 Oct 2025 19:48:00 GMT"
       ],
       "server": [
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=hDgG_GHFTp29i4QJt6PSkD0LsTDqANduanENDCrKMT0-1759844464-1.0.1.1-eWN8tOtirWOI70iGJbZV6H.KReNm4yHP5LC4CyO9X9WZtsGkvL8iaz57CHQH9sj6NpyqcGnlCCteptNlsMBtAI2zZKYI6iQ7t0dXOGpDKl4; path=/; expires=Tue, 07-Oct-25 14:11:04 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=dcZA44Qz6wtT7sU5mhlEhs0hcfod0TEvb1Eb4mGOqSk-1760471280-1.0.1.1-J.7yE1IJ6SBm9.9lOja0JIssAKBb4EGKXxYxcBJRY1_qaD.LGyd.tm2PzJvLllJiC8tVqN3Y8fxmPbdvDjf4aAzEgQHmlAXzethb6PXTCLk; path=/; expires=Tue, 14-Oct-25 20:18:00 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000"
@@ -105,7 +105,7 @@
         "origin, access-control-request-method, access-control-request-headers"
       ],
       "x-request-id": [
-        "00-9561610394b360ddbe47d02361553476-771b6b2a0019906e-01"
+        "00-d47b38e05fb32c36fbc78e19880d3293-d7c18cf400685ce9-01"
       ],
       "x-zero-data-retention": [
         "false"

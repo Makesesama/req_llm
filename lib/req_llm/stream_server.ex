@@ -65,6 +65,7 @@ defmodule ReqLLM.StreamServer do
   alias ReqLLM.Streaming.SSE
 
   require Logger
+  require ReqLLM.Debug, as: Debug
 
   @type server :: GenServer.server()
   @type status :: :init | :streaming | :done | {:error, any()}
@@ -76,6 +77,7 @@ defmodule ReqLLM.StreamServer do
     :fixture_path,
     :http_context,
     :canonical_json,
+    :protocol_parser,
     :provider_state,
     sse_buffer: "",
     queue: :queue.new(),
@@ -87,7 +89,10 @@ defmodule ReqLLM.StreamServer do
     http_status: nil,
     waiting_callers: [],
     object_json_mode?: false,
-    object_acc: []
+    object_acc: [],
+    fixture_saved?: false,
+    raw_iodata: [],
+    raw_bytes: 0
   ]
 
   @doc """
@@ -285,7 +290,15 @@ defmodule ReqLLM.StreamServer do
 
   @impl GenServer
   def init(state) do
-    {:ok, state}
+    # Inject protocol parser function
+    protocol_parser =
+      if function_exported?(state.provider_mod, :parse_stream_protocol, 2) do
+        &state.provider_mod.parse_stream_protocol/2
+      else
+        &ReqLLM.Provider.parse_stream_protocol/2
+      end
+
+    {:ok, %{state | protocol_parser: protocol_parser}}
   end
 
   @impl GenServer
@@ -426,35 +439,41 @@ defmodule ReqLLM.StreamServer do
     {:reply, :ok, new_state}
   end
 
-  defp process_data_chunk(chunk, state) do
-    # Capture raw chunk for fixture system BEFORE processing
-    if state.fixture_path && is_binary(chunk) do
-      if System.get_env("REQ_LLM_DEBUG") == "1" do
-        Logger.debug("""
-        StreamServer fixture capture:
-          path: #{state.fixture_path}
-          chunk_size: #{byte_size(chunk)}
-          first_bytes: #{inspect(binary_part(chunk, 0, min(64, byte_size(chunk))))}
-        """)
-      end
+  defp parse_protocol_events(chunk, state) do
+    # Call the injected protocol parser
+    case state.protocol_parser.(chunk, state.sse_buffer) do
+      {:ok, events, new_buffer} ->
+        {events, new_buffer}
 
-      try do
-        case Code.ensure_loaded(ReqLLM.Step.Fixture.Backend) do
-          {:module, ReqLLM.Step.Fixture.Backend} ->
-            apply(ReqLLM.Step.Fixture.Backend, :capture_raw_chunk, [state.fixture_path, chunk])
+      {:incomplete, new_buffer} ->
+        {[], new_buffer}
 
-          {:error, _} ->
-            :ok
-        end
-      rescue
-        # Ignore fixture errors to avoid breaking streaming
-        error ->
-          Logger.debug("Fixture capture error (ignored): #{inspect(error)}")
-      end
+      {:error, reason} ->
+        Logger.warning("Protocol parse error: #{inspect(reason)}")
+        {[], state.sse_buffer}
     end
+  end
 
-    # Accumulate and parse SSE events
-    {events, new_buffer} = SSE.accumulate_and_parse(chunk, state.sse_buffer)
+  defp process_data_chunk(chunk, state) do
+    # Capture raw chunk for fixture - accumulate in state
+    state =
+      if state.fixture_path && is_binary(chunk) do
+        new_bytes = state.raw_bytes + byte_size(chunk)
+
+        # Warn if fixture is growing unexpectedly large (>100MB)
+        if new_bytes > 100_000_000 and state.raw_bytes <= 100_000_000 do
+          Logger.warning(
+            "Streaming fixture exceeded 100MB at #{state.fixture_path} - consider reviewing test data size"
+          )
+        end
+
+        %{state | raw_iodata: [chunk | state.raw_iodata], raw_bytes: new_bytes}
+      else
+        state
+      end
+
+    # Use provider's protocol parser (defaults to SSE if not overridden)
+    {events, new_buffer} = parse_protocol_events(chunk, state)
 
     # Decode events using provider (with optional state threading)
     {stream_chunks, new_provider_state} =
@@ -569,22 +588,20 @@ defmodule ReqLLM.StreamServer do
       if state.object_json_mode? do
         full = state.object_acc |> IO.iodata_to_binary() |> String.trim()
 
-        if System.get_env("REQ_LLM_DEBUG") in ["1", "true"] do
-          IO.puts("[StreamServer] JSON mode finalize: accumulated=#{inspect(full)}")
-        end
+        Debug.dbug(fn -> "JSON mode finalize: accumulated=#{inspect(full)}" end,
+          component: :stream_server
+        )
 
         case Jason.decode(full) do
           {:ok, obj} ->
-            if System.get_env("REQ_LLM_DEBUG") in ["1", "true"] do
-              IO.puts("[StreamServer] Parsed object: #{inspect(obj)}")
-            end
+            Debug.dbug(fn -> "Parsed object: #{inspect(obj)}" end, component: :stream_server)
 
             [ReqLLM.StreamChunk.tool_call("structured_output", obj)]
 
           {:error, reason} ->
-            if System.get_env("REQ_LLM_DEBUG") in ["1", "true"] do
-              IO.puts("[StreamServer] Failed to parse JSON: #{inspect(reason)}")
-            end
+            Debug.dbug(fn -> "Failed to parse JSON: #{inspect(reason)}" end,
+              component: :stream_server
+            )
 
             []
         end
@@ -602,48 +619,69 @@ defmodule ReqLLM.StreamServer do
   end
 
   defp finalize_stream_with_fixture(state) do
-    debug? = System.get_env("REQ_LLM_DEBUG") in ["1", "true"]
+    Debug.dbug(
+      fn ->
+        "finalize_stream_with_fixture: fixture_path=#{inspect(state.fixture_path)}, has_http_context=#{inspect(state.http_context != nil)}, has_canonical_json=#{inspect(state.canonical_json != nil)}, already_saved=#{state.fixture_saved?}"
+      end,
+      component: :stream_server
+    )
 
-    debug? &&
-      IO.puts(
-        "[StreamServer] finalize_stream_with_fixture: fixture_path=#{inspect(state.fixture_path)}, has_http_context=#{inspect(state.http_context != nil)}, has_canonical_json=#{inspect(state.canonical_json != nil)}"
+    # Only save once - guard against multiple finalization calls
+    if state.fixture_path && state.http_context && state.canonical_json && !state.fixture_saved? do
+      Debug.dbug(
+        fn ->
+          "Attempting to save streaming fixture to #{Path.relative_to_cwd(state.fixture_path)}"
+        end,
+        component: :stream_server
       )
-
-    if state.fixture_path && state.http_context && state.canonical_json do
-      debug? &&
-        IO.puts(
-          "[StreamServer] Attempting to save streaming fixture to #{Path.relative_to_cwd(state.fixture_path)}"
-        )
 
       try do
         case Code.ensure_loaded(ReqLLM.Step.Fixture.Backend) do
           {:module, ReqLLM.Step.Fixture.Backend} ->
-            debug? && IO.puts("[StreamServer] Calling save_streaming_fixture...")
+            Debug.dbug(
+              fn -> "Calling save_streaming_fixture with #{state.raw_bytes} bytes..." end,
+              component: :stream_server
+            )
+
+            # Pass iodata directly - reversed because we prepended
+            iodata = Enum.reverse(state.raw_iodata)
 
             apply(ReqLLM.Step.Fixture.Backend, :save_streaming_fixture, [
               state.http_context,
               state.fixture_path,
               state.canonical_json,
-              state.model
+              state.model,
+              iodata
             ])
 
-            debug? && IO.puts("[StreamServer] save_streaming_fixture completed")
+            Debug.dbug("save_streaming_fixture completed", component: :stream_server)
 
           {:error, _} ->
-            debug? && IO.puts("[StreamServer] Could not load ReqLLM.Step.Fixture.Backend")
+            Debug.dbug("Could not load ReqLLM.Step.Fixture.Backend", component: :stream_server)
             :ok
         end
       rescue
         error ->
-          debug? && IO.puts("[StreamServer] Error saving fixture: #{inspect(error)}")
+          Debug.dbug(fn -> "Error saving fixture: #{inspect(error)}" end,
+            component: :stream_server
+          )
+
           Logger.warning("Failed to save streaming fixture: #{inspect(error)}")
       end
-    else
-      debug? && IO.puts("[StreamServer] Skipping fixture save - missing requirements")
-    end
 
-    # Continue with normal finalization
-    finalize_stream(state)
+      # Mark as saved to prevent duplicate saves
+      state = %{state | fixture_saved?: true}
+      Debug.dbug("Fixture marked as saved", component: :stream_server)
+      # Continue with normal finalization
+      finalize_stream(state)
+    else
+      Debug.dbug("Skipping fixture save - missing requirements or already saved",
+        component: :stream_server
+      )
+
+      # Continue with normal finalization
+      finalize_stream(state)
+    end
   end
 
   defp extract_final_metadata(state) do
@@ -720,15 +758,19 @@ defmodule ReqLLM.StreamServer do
   defp normalize_streaming_usage(usage, model) when is_map(usage) do
     case usage do
       %{"prompt_tokens" => input, "completion_tokens" => output} ->
-        %{input: input, output: output, reasoning: 0, cached_input: 0}
+        reasoning = reasoning_from_usage(usage)
+        cached_input = cached_from_usage(usage)
+
+        %{input: input, output: output, reasoning: reasoning, cached_input: cached_input}
         |> add_token_aliases()
         |> add_cost_calculation_if_available(usage)
         |> calculate_cost_if_model_available(model)
 
       %{"input_tokens" => input, "output_tokens" => output} ->
-        cached_input = Map.get(usage, "cache_read_input_tokens", 0)
+        reasoning = reasoning_from_usage(usage)
+        cached_input = cached_from_usage(usage)
 
-        %{input: input, output: output, reasoning: 0, cached_input: cached_input}
+        %{input: input, output: output, reasoning: reasoning, cached_input: cached_input}
         |> add_token_aliases()
         |> add_cost_calculation_if_available(usage)
         |> calculate_cost_if_model_available(model)
@@ -748,6 +790,20 @@ defmodule ReqLLM.StreamServer do
   end
 
   defp normalize_streaming_usage(usage, _model), do: usage
+
+  defp reasoning_from_usage(usage) do
+    get_in(usage, ["completion_tokens_details", "reasoning_tokens"]) ||
+      get_in(usage, ["output_tokens_details", "reasoning_tokens"]) ||
+      Map.get(usage, "reasoning_tokens", 0) ||
+      Map.get(usage, "reasoning_output_tokens", 0)
+  end
+
+  defp cached_from_usage(usage) do
+    get_in(usage, ["prompt_tokens_details", "cached_tokens"]) ||
+      get_in(usage, ["input_tokens_details", "cached_tokens"]) ||
+      Map.get(usage, "cache_read_input_tokens", 0) ||
+      Map.get(usage, "cached_tokens", 0)
+  end
 
   defp add_token_aliases(usage) do
     usage

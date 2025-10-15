@@ -1,7 +1,7 @@
 {
   "request": {
     "body": {
-      "b64": "eyJpbnB1dCI6W3siY29udGVudCI6W3sidGV4dCI6IldoYXQncyB0aGUgd2VhdGhlciBsaWtlIGluIFBhcmlzLCBGcmFuY2U/IiwidHlwZSI6ImlucHV0X3RleHQifV0sInJvbGUiOiJ1c2VyIn1dLCJtYXhfb3V0cHV0X3Rva2VucyI6MjAwMDAsIm1vZGVsIjoiY29kZXgtbWluaS1sYXRlc3QiLCJzdHJlYW0iOmZhbHNlLCJ0b29scyI6W3siZnVuY3Rpb24iOnsiZGVzY3JpcHRpb24iOiJHZXQgY3VycmVudCB3ZWF0aGVyIGluZm9ybWF0aW9uIGZvciBhIGxvY2F0aW9uIiwibmFtZSI6ImdldF93ZWF0aGVyIiwicGFyYW1ldGVycyI6eyJwcm9wZXJ0aWVzIjp7ImxvY2F0aW9uIjp7InR5cGUiOiJzdHJpbmcifSwidW5pdCI6eyJlbnVtIjpbImNlbHNpdXMiLCJmYWhyZW5oZWl0Il0sInR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbImxvY2F0aW9uIl0sInR5cGUiOiJvYmplY3QifX0sIm5hbWUiOiJnZXRfd2VhdGhlciIsInR5cGUiOiJmdW5jdGlvbiJ9LHsiZnVuY3Rpb24iOnsiZGVzY3JpcHRpb24iOiJUZWxsIGEgZnVubnkgam9rZSIsIm5hbWUiOiJ0ZWxsX2pva2UiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnsidG9waWMiOnsiZGVzY3JpcHRpb24iOiJUb3BpYyBmb3IgdGhlIGpva2UiLCJ0eXBlIjoic3RyaW5nIn19LCJ0eXBlIjoib2JqZWN0In19LCJuYW1lIjoidGVsbF9qb2tlIiwidHlwZSI6ImZ1bmN0aW9uIn0seyJmdW5jdGlvbiI6eyJkZXNjcmlwdGlvbiI6IkdldCB0aGUgY3VycmVudCB0aW1lIiwibmFtZSI6ImdldF90aW1lIiwicGFyYW1ldGVycyI6eyJwcm9wZXJ0aWVzIjp7fSwidHlwZSI6Im9iamVjdCJ9fSwibmFtZSI6ImdldF90aW1lIiwidHlwZSI6ImZ1bmN0aW9uIn1dfQ=="
+      "b64": "eyJpbnB1dCI6W3siY29udGVudCI6W3sidGV4dCI6IldoYXQncyB0aGUgd2VhdGhlciBsaWtlIGluIFBhcmlzLCBGcmFuY2U/IiwidHlwZSI6ImlucHV0X3RleHQifV0sInJvbGUiOiJ1c2VyIn1dLCJtYXhfb3V0cHV0X3Rva2VucyI6MjAwMDAsIm1vZGVsIjoiY29kZXgtbWluaS1sYXRlc3QiLCJzdHJlYW0iOmZhbHNlLCJ0b29scyI6W3siZnVuY3Rpb24iOnsiZGVzY3JpcHRpb24iOiJHZXQgY3VycmVudCB3ZWF0aGVyIGluZm9ybWF0aW9uIGZvciBhIGxvY2F0aW9uIiwibmFtZSI6ImdldF93ZWF0aGVyIiwicGFyYW1ldGVycyI6eyJwcm9wZXJ0aWVzIjp7ImxvY2F0aW9uIjp7InR5cGUiOiJzdHJpbmcifSwidW5pdCI6eyJlbnVtIjpbImNlbHNpdXMiLCJmYWhyZW5oZWl0Il0sInR5cGUiOiJzdHJpbmcifX0sInJlcXVpcmVkIjpbImxvY2F0aW9uIiwidW5pdCJdLCJ0eXBlIjoib2JqZWN0In0sInN0cmljdCI6dHJ1ZX0sIm5hbWUiOiJnZXRfd2VhdGhlciIsInR5cGUiOiJmdW5jdGlvbiJ9LHsiZnVuY3Rpb24iOnsiZGVzY3JpcHRpb24iOiJUZWxsIGEgZnVubnkgam9rZSIsIm5hbWUiOiJ0ZWxsX2pva2UiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnsidG9waWMiOnsiZGVzY3JpcHRpb24iOiJUb3BpYyBmb3IgdGhlIGpva2UiLCJ0eXBlIjoic3RyaW5nIn19LCJyZXF1aXJlZCI6WyJ0b3BpYyJdLCJ0eXBlIjoib2JqZWN0In0sInN0cmljdCI6dHJ1ZX0sIm5hbWUiOiJ0ZWxsX2pva2UiLCJ0eXBlIjoiZnVuY3Rpb24ifSx7ImZ1bmN0aW9uIjp7ImRlc2NyaXB0aW9uIjoiR2V0IHRoZSBjdXJyZW50IHRpbWUiLCJuYW1lIjoiZ2V0X3RpbWUiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnt9LCJyZXF1aXJlZCI6W10sInR5cGUiOiJvYmplY3QifSwic3RyaWN0Ijp0cnVlfSwibmFtZSI6ImdldF90aW1lIiwidHlwZSI6ImZ1bmN0aW9uIn1dfQ=="
     },
     "canonical_json": {
       "input": [
@@ -37,10 +37,12 @@
                 }
               },
               "required": [
-                "location"
+                "location",
+                "unit"
               ],
               "type": "object"
-            }
+            },
+            "strict": true
           },
           "name": "get_weather",
           "type": "function"
@@ -56,8 +58,12 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "topic"
+              ],
               "type": "object"
-            }
+            },
+            "strict": true
           },
           "name": "tell_joke",
           "type": "function"
@@ -68,8 +74,10 @@
             "name": "get_time",
             "parameters": {
               "properties": {},
+              "required": [],
               "type": "object"
-            }
+            },
+            "strict": true
           },
           "name": "get_time",
           "type": "function"
@@ -97,9 +105,9 @@
       "billing": {
         "payer": "developer"
       },
-      "created_at": 1759795785,
+      "created_at": 1760542800,
       "error": null,
-      "id": "resp_0505ce5b90a863850068e45a494fd08196a3632c984d753659",
+      "id": "resp_0e44389686d7625f0068efc0507c808193a56284a400319ad2",
       "incomplete_details": null,
       "instructions": null,
       "max_output_tokens": 20000,
@@ -109,14 +117,19 @@
       "object": "response",
       "output": [
         {
-          "id": "rs_0505ce5b90a863850068e45a49acd88196bec838843688bd50",
+          "id": "rs_0e44389686d7625f0068efc05137348193a7460eb71a78fe46",
+          "summary": [],
+          "type": "reasoning"
+        },
+        {
+          "id": "rs_0e44389686d7625f0068efc052558881938c049b8da3d68bea",
           "summary": [],
           "type": "reasoning"
         },
         {
           "arguments": "{}",
-          "call_id": "call_GLkFoEyt8y23RJfqr6w3fE0j",
-          "id": "fc_0505ce5b90a863850068e45a4a89b881969ec4e6860c0109a3",
+          "call_id": "call_zY3jMjtFnUPEtJsV4TmgtUm8",
+          "id": "fc_0e44389686d7625f0068efc05541e48193b82b3a7966e68fe9",
           "name": "get_weather",
           "status": "completed",
           "type": "function_call"
@@ -187,11 +200,11 @@
         "input_tokens_details": {
           "cached_tokens": 0
         },
-        "output_tokens": 144,
+        "output_tokens": 592,
         "output_tokens_details": {
-          "reasoning_tokens": 128
+          "reasoning_tokens": 576
         },
-        "total_tokens": 198
+        "total_tokens": 646
       },
       "user": null
     },
@@ -203,7 +216,7 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98a92be9ceb921af-ORD"
+        "98f069969f984783-ORD"
       ],
       "connection": [
         "keep-alive"
@@ -212,13 +225,13 @@
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 00:09:46 GMT"
+        "Wed, 15 Oct 2025 15:40:08 GMT"
       ],
       "openai-organization": [
         "epic-creative-sogybe"
       ],
       "openai-processing-ms": [
-        "1583"
+        "8356"
       ],
       "openai-project": [
         "proj_j5AhgU4eLMRmsoO9FDg7BRD3"
@@ -230,8 +243,8 @@
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=..5Kg5n.uyOTuAcMxX78K0k1yDz26VycPoqJIC.Gbjs-1759795786-1.0.1.1-LIrtKrJqgviaCfToorWe8LgE_1OlSFDgvY4ocuQYwC6LArsRmT0q5Gboa5Z.zJhgZ5agv_azH5i8Gd7GuLZH.8KvouRs2FzIs1oKqMDJb9o; path=/; expires=Tue, 07-Oct-25 00:39:46 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
-        "_cfuvid=FFqBUgV6UprVRzKAz.pfmvRVbnyFb1V9BPNRAZiYbDQ-1759795786911-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=q71x6tl_5YHigV2gHg79FqPlUFpCz6CyIZCwq2894N8-1760542808-1.0.1.1-Hzp92S_YdLXmV8oWNx3RbAN3A0m0zMB2RwUwpLrNQPwfIipmhGlEhyWVd4v4TijUF4dD6xkIoWcq5FzSHGHjikBUUFIw40Wln0WLuMTHy3A; path=/; expires=Wed, 15-Oct-25 16:10:08 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None",
+        "_cfuvid=WfLLgQJrusCDw1LSpEbob9_1p4J5qjhZ8yV_yzT4GQc-1760542808850-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000; includeSubDomains; preload"
@@ -243,10 +256,10 @@
         "nosniff"
       ],
       "x-envoy-upstream-service-time": [
-        "1585"
+        "8362"
       ],
       "x-request-id": [
-        "req_7f09ff9a94e7ba6a83016dd93397e804"
+        "req_a3a77d4fa1bc482ab7686b00a79a63ed"
       ]
     },
     "status": 200

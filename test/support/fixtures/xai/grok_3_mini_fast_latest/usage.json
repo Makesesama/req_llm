@@ -1,10 +1,10 @@
 {
   "request": {
     "body": {
-      "b64": "eyJtYXhfY29tcGxldGlvbl90b2tlbnMiOjUwMCwibWVzc2FnZXMiOlt7ImNvbnRlbnQiOiJIaSB0aGVyZSEiLCJyb2xlIjoidXNlciJ9XSwibW9kZWwiOiJncm9rLTMtbWluaS1mYXN0LWxhdGVzdCIsInNlZWQiOjQyLCJzdHJlYW0iOmZhbHNlLCJ0ZW1wZXJhdHVyZSI6MC4wfQ=="
+      "b64": "eyJtYXhfY29tcGxldGlvbl90b2tlbnMiOjEwLCJtZXNzYWdlcyI6W3siY29udGVudCI6IkhpIHRoZXJlISIsInJvbGUiOiJ1c2VyIn1dLCJtb2RlbCI6Imdyb2stMy1taW5pLWZhc3QtbGF0ZXN0Iiwic2VlZCI6NDIsInN0cmVhbSI6ZmFsc2UsInRlbXBlcmF0dXJlIjowLjB9"
     },
     "canonical_json": {
-      "max_completion_tokens": 500,
+      "max_completion_tokens": 10,
       "messages": [
         {
           "content": "Hi there!",
@@ -35,27 +35,27 @@
     "body": {
       "choices": [
         {
-          "finish_reason": "stop",
+          "finish_reason": "length",
           "index": 0,
           "message": {
-            "content": "Hi! I'm Grok, your friendly AI assistant from xAI. How can I help you today? 😊",
-            "reasoning_content": "First, the user said: \"Hi there!\" This is a casual greeting. As Grok, I'm supposed to be helpful, truthful, and maximally truthful, as per my system prompt. I should respond in a friendly, engaging manner to build rapport.\n\nMy system prompt says: \"You are Grok, a helpful and maximally truthful AI built by xAI, not based on any other companies and their models.\" So, I need to stay true to that. I shouldn't claim affiliations with other companies.\n\nA good response to a greeting should:\n- Acknowledge the greeting.\n- Be polite and welcoming.\n- Possibly invite further conversation to be helpful.\n- Keep it concise since this is just a hello.\n\nPossible responses:\n- \"Hi! How can I help you today?\"\n- \"Hello! It's great to chat. What's on your mind?\"\n- \"Hey there! I'm Grok, here to assist. What do you need?\"\n\nI should include my identity subtly, as it's good to remind users who they're talking to, especially since I'm specified as Grok.\n\nThe user might be starting a conversation, so I should encourage them to ask questions or share what's on their mind.\n\nFinally, ensure the response is truthful and not misleading. There's nothing untruthful in a simple greeting.\n\nCrafting the response:\n- Start with a greeting back.\n- Introduce myself briefly if needed.\n- Offer help.",
+            "content": "Hi there! I'm Grok, your friendly AI",
+            "reasoning_content": "First, the user said, \"Hi there!\" which is a casual greeting. As an AI assistant, I should respond in a friendly, helpful, and engaging manner to build rapport.\n\nMy role is to be Grok, created by xAI, so I need to incorporate that into my response if appropriate. The system prompt says: \"You are Grok, a helpful and maximally truthful AI built by xAI, not based on any other companies and their models.\" So, I should identify myself as Grok.\n\nA typical response to a greeting would be to greet back and perhaps ask how I can help. Since this is the start of a conversation, I should keep it light and inviting.\n\nPossible structure:\n1. Greet back: Match the casual tone with something like \"Hi!\" or \"Hello!\"\n2. Introduce myself: Mention that I'm Grok to reinforce my identity.\n3. Offer assistance: Ask if there's anything specific they need help with, as per my helpful nature.\n4. Keep it concise: Don't overwhelm with too much text.\n\nEnsure I'm truthful: Everything I say should be accurate. For example, I'm built by xAI, so that's fine.\n\nFinal response idea:\n- Start with \"Hi there!\"\n- Add \"I'm Grok, your AI assistant from xAI.\"\n- End with \"How can I assist you today?\"\n\nThis makes it friendly, informative, and proactive.",
             "refusal": null,
             "role": "assistant"
           }
         }
       ],
-      "created": 1759844454,
-      "id": "1b6ea24a-f5d3-3260-ae16-b8861d955c55_us-east-1",
+      "created": 1760471284,
+      "id": "bca07add-993f-de7c-94fb-ea88a8880a00_us-east-1",
       "model": "grok-3-mini",
       "object": "chat.completion",
       "system_fingerprint": "fp_4fae27f477",
       "usage": {
-        "completion_tokens": 23,
+        "completion_tokens": 10,
         "completion_tokens_details": {
           "accepted_prediction_tokens": 0,
           "audio_tokens": 0,
-          "reasoning_tokens": 280,
+          "reasoning_tokens": 282,
           "rejected_prediction_tokens": 0
         },
         "num_sources_used": 0,
@@ -66,7 +66,7 @@
           "image_tokens": 0,
           "text_tokens": 10
         },
-        "total_tokens": 313
+        "total_tokens": 302
       }
     },
     "headers": {
@@ -80,28 +80,22 @@
         "DYNAMIC"
       ],
       "cf-ray": [
-        "98add0236b732264-ORD"
+        "98e997998eba338f-ORD"
       ],
       "connection": [
         "keep-alive"
-      ],
-      "content-security-policy-report-only": [
-        "script-src 'none'; connect-src 'none'; report-uri https://csp-reporting.cloudflare.com/cdn-cgi/script_monitor/report?m=yxZrGf.ifqJJH2r4uOXoZNQUsnn4AaVsm9aAuKO0kas-1759844457-1.0.1.1-DOI9V4zmjRE8wmINa6hkjDqL5f7w1DWc5Z4uGBBLph5gShQBxZXfjiJo_QB8AsoyLWGk.1v4z8Nw.ME.tep_cl_J6o2Gc1SkSzpUzpJhuWmKDkMVRqD1Ooy.gRk2nisXybKezzDv7tzSuS3AryVWakH5mSWjezJedJsPm6Q979E; report-to cf-csp-endpoint"
       ],
       "content-type": [
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:40:57 GMT"
-      ],
-      "report-to": [
-        "{\"endpoints\":[{\"url\":\"https:\\/\\/csp-reporting.cloudflare.com\\/cdn-cgi\\/script_monitor\\/report?m=yxZrGf.ifqJJH2r4uOXoZNQUsnn4AaVsm9aAuKO0kas-1759844457-1.0.1.1-DOI9V4zmjRE8wmINa6hkjDqL5f7w1DWc5Z4uGBBLph5gShQBxZXfjiJo_QB8AsoyLWGk.1v4z8Nw.ME.tep_cl_J6o2Gc1SkSzpUzpJhuWmKDkMVRqD1Ooy.gRk2nisXybKezzDv7tzSuS3AryVWakH5mSWjezJedJsPm6Q979E\"}],\"group\":\"cf-csp-endpoint\",\"max_age\":86400}"
+        "Tue, 14 Oct 2025 19:48:08 GMT"
       ],
       "server": [
         "cloudflare"
       ],
       "set-cookie": [
-        "__cf_bm=mYW2EopaIO1x9IYoz2LytXnV1TWTKNRes8bBNbXOwRI-1759844457-1.0.1.1-mdRobt8CnmW87yUfsKkVb.OzLEUo1YzxwGVfo5OVzJt6rOYnpiWoCg.n5YfH5EYzXKKfCkc2ZS3Fg1X3NIWiCcpEvX4yg.veUgLLDZmmbAI; path=/; expires=Tue, 07-Oct-25 14:10:57 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
+        "__cf_bm=K6K0.K2zsBsO4jnBBx4iw4hyR5R8ozGiWQ7K9F72OE0-1760471288-1.0.1.1-zsRO_8bM.BCayJIKQTHN1StXry5uy7DVqwh2X9Py.UFdg48mbr3O1lSRjHeXnfkJXSkF2vyGWDZMCDJj7kaUz2458as5MYyuI.bYDvk1XIQ; path=/; expires=Tue, 14-Oct-25 20:18:08 GMT; domain=.x.ai; HttpOnly; Secure; SameSite=None"
       ],
       "strict-transport-security": [
         "max-age=31536000"
@@ -113,7 +107,7 @@
         "origin, access-control-request-method, access-control-request-headers"
       ],
       "x-request-id": [
-        "00-96a9d3e399bdf17c3479fc8c1820fe92-c2fba57f001910af-01"
+        "00-1b3aabad3bca5636c044674a50e67992-45176090005ae057-01"
       ],
       "x-zero-data-retention": [
         "false"

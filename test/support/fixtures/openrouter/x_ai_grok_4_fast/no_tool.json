@@ -1,7 +1,7 @@
 {
   "request": {
     "body": {
-      "b64": "eyJtYXhfdG9rZW5zIjozMDAwLCJtZXNzYWdlcyI6W3siY29udGVudCI6IlRlbGwgbWUgYSBqb2tlIGFib3V0IGNhdHMiLCJyb2xlIjoidXNlciJ9XSwibW9kZWwiOiJ4LWFpL2dyb2stNC1mYXN0IiwibiI6MSwic2VlZCI6NDIsInN0cmVhbSI6ZmFsc2UsInRlbXBlcmF0dXJlIjowLjAsInRvb2xzIjpbeyJmdW5jdGlvbiI6eyJkZXNjcmlwdGlvbiI6IkdldCBjdXJyZW50IHdlYXRoZXIgaW5mb3JtYXRpb24gZm9yIGEgbG9jYXRpb24iLCJuYW1lIjoiZ2V0X3dlYXRoZXIiLCJwYXJhbWV0ZXJzIjp7InByb3BlcnRpZXMiOnsibG9jYXRpb24iOnsidHlwZSI6InN0cmluZyJ9fSwicmVxdWlyZWQiOlsibG9jYXRpb24iXSwidHlwZSI6Im9iamVjdCJ9fSwidHlwZSI6ImZ1bmN0aW9uIn1dfQ=="
+      "b64": "eyJtYXhfdG9rZW5zIjozMDAwLCJtZXNzYWdlcyI6W3siY29udGVudCI6IlRlbGwgbWUgYSBqb2tlIGFib3V0IGNhdHMiLCJyb2xlIjoidXNlciJ9XSwibW9kZWwiOiJ4LWFpL2dyb2stNC1mYXN0IiwibiI6MSwic2VlZCI6NDIsInN0cmVhbSI6ZmFsc2UsInRlbXBlcmF0dXJlIjowLjAsInRvb2xzIjpbeyJmdW5jdGlvbiI6eyJkZXNjcmlwdGlvbiI6IkdldCBjdXJyZW50IHdlYXRoZXIgaW5mb3JtYXRpb24gZm9yIGEgbG9jYXRpb24iLCJuYW1lIjoiZ2V0X3dlYXRoZXIiLCJwYXJhbWV0ZXJzIjp7ImFkZGl0aW9uYWxQcm9wZXJ0aWVzIjpmYWxzZSwicHJvcGVydGllcyI6eyJsb2NhdGlvbiI6eyJ0eXBlIjoic3RyaW5nIn19LCJyZXF1aXJlZCI6WyJsb2NhdGlvbiJdLCJ0eXBlIjoib2JqZWN0In19LCJ0eXBlIjoiZnVuY3Rpb24ifV19"
     },
     "canonical_json": {
       "max_tokens": 3000,
@@ -22,6 +22,7 @@
             "description": "Get current weather information for a location",
             "name": "get_weather",
             "parameters": {
+              "additionalProperties": false,
               "properties": {
                 "location": {
                   "type": "string"
@@ -60,31 +61,32 @@
           "index": 0,
           "logprobs": null,
           "message": {
-            "content": "Why did the cat go to school?  \n\nTo improve its purr-sonal skills! 😺",
+            "content": "Why was the cat afraid of the tree? Because of its bark!",
             "reasoning": null,
+            "reasoning_details": [
+              {
+                "data": "mRpMnPQ7XEo58EF0el1WXhxwYOMENaMaHSgEwcgpD1uvTeKKIwwuX2YFfOfQJ8N+2+vvn4j1OmqazCgdhCD8WvaiIrP4Qq7U4cq3zRnby9ybmJg9RoF+fpgECjJCvJQ+8oW30FScm4ZgwlHdKUBOIwDDqyCwJDevdQLVeWxsWjF6NM3taUIJooc9n67uX2ZyjhPom88eskPA3Zv4cdHe/tHRvfC5rkM30q4G7O6A/HCrFMMZ9KodPDlEU5pvPZONRoqf+y5dY9nPYk0mup1Fh7BiHjEuB8795PN5Lf41dalhVRdnVlmppNG5nXysYoG77paCKSeiCUD8h8YgL56LfCRaf2QSYKeC1Imihoz6PAm70PL+Jois2N8PYh0dzAQWQkatxwu0pdPy6ngGVupiFyzmYQtATCXz8xZes9caPNTwl1oLfQnEifm3J+mTzQWbd7Q",
+                "format": "xai-responses-v1",
+                "id": "rs_1ed23d22-8335-1d83-d3e1-62c89a87383b_us-east-1",
+                "index": 0,
+                "type": "reasoning.encrypted"
+              }
+            ],
             "refusal": null,
             "role": "assistant"
           },
-          "native_finish_reason": "stop"
+          "native_finish_reason": "completed"
         }
       ],
-      "created": 1759845452,
-      "id": "gen-1759845452-Pf20T9eIiXkbGuN3989Z",
+      "created": 1760532572,
+      "id": "gen-1760532572-VPHCYYCSay8tin3rCBjU",
       "model": "x-ai/grok-4-fast",
       "object": "chat.completion",
       "provider": "xAI",
-      "system_fingerprint": "fp_9362061f30",
       "usage": {
-        "completion_tokens": 219,
-        "completion_tokens_details": {
-          "reasoning_tokens": 200
-        },
-        "prompt_tokens": 311,
-        "prompt_tokens_details": {
-          "audio_tokens": 0,
-          "cached_tokens": 266
-        },
-        "total_tokens": 530
+        "completion_tokens": 84,
+        "prompt_tokens": 355,
+        "total_tokens": 439
       }
     },
     "headers": {
@@ -92,7 +94,7 @@
         "*"
       ],
       "cf-ray": [
-        "98ade8803ee949a7-ORD"
+        "98ef6fdede9bf85a-ORD"
       ],
       "connection": [
         "keep-alive"
@@ -101,7 +103,7 @@
         "application/json"
       ],
       "date": [
-        "Tue, 07 Oct 2025 13:57:33 GMT"
+        "Wed, 15 Oct 2025 12:49:32 GMT"
       ],
       "permissions-policy": [
         "payment=(self \"https://checkout.stripe.com\" \"https://connect-js.stripe.com\" \"https://js.stripe.com\" \"https://*.js.stripe.com\" \"https://hooks.stripe.com\")"

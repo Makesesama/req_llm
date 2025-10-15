@@ -62,7 +62,7 @@ defmodule ReqLLM.Response do
   Extract text content from the response message.
 
   Returns the concatenated text from all content parts in the assistant message.
-  Returns nil when no message is present. For streaming responses, this may be nil 
+  Returns nil when no message is present. For streaming responses, this may be nil
   until the stream is joined.
 
   ## Examples
@@ -104,6 +104,7 @@ defmodule ReqLLM.Response do
   Extract tool calls from the response message.
 
   Returns a list of tool calls if the message contains them, empty list otherwise.
+  Always returns normalized maps with `.name` and `.arguments` fields.
 
   ## Examples
 
@@ -116,12 +117,11 @@ defmodule ReqLLM.Response do
 
   def tool_calls(%__MODULE__{message: %Message{tool_calls: tool_calls}})
       when is_list(tool_calls) do
-    tool_calls
+    Enum.map(tool_calls, &normalize_tool_call/1)
   end
 
   def tool_calls(%__MODULE__{message: %Message{tool_calls: nil, content: content}})
       when is_list(content) do
-    # Extract tool calls from content parts (e.g., for Anthropic)
     content
     |> Enum.filter(&(&1.type == :tool_call))
     |> Enum.map(fn part ->
@@ -134,6 +134,30 @@ defmodule ReqLLM.Response do
   end
 
   def tool_calls(%__MODULE__{message: %Message{tool_calls: nil}}), do: []
+
+  defp normalize_tool_call(%ReqLLM.ToolCall{} = tool_call) do
+    arguments =
+      case tool_call.function.arguments do
+        args when is_binary(args) ->
+          case Jason.decode(args) do
+            {:ok, decoded} -> decoded
+            _ -> args
+          end
+
+        args ->
+          args
+      end
+
+    %{
+      name: tool_call.function.name,
+      arguments: arguments,
+      id: tool_call.id
+    }
+  end
+
+  defp normalize_tool_call(tool_call) when is_map(tool_call) do
+    tool_call
+  end
 
   @doc """
   Get the finish reason for this response.
@@ -295,24 +319,29 @@ defmodule ReqLLM.Response do
   @spec decode_response(term(), Model.t() | String.t()) :: {:ok, t()} | {:error, term()}
   def decode_response(raw_data, model_input) do
     model = if is_binary(model_input), do: Model.from!(model_input), else: model_input
-    {:ok, provider_mod} = ReqLLM.Provider.Registry.get_provider(model.provider)
 
-    wrapped_data =
-      if function_exported?(provider_mod, :wrap_response, 1) do
-        provider_mod.wrap_response(raw_data)
-      else
-        # fallback for providers without wrap_response/1
-        raw_data
-      end
+    case ReqLLM.Provider.Registry.get_provider(model.provider) do
+      {:ok, provider_mod} ->
+        wrapped_data =
+          if function_exported?(provider_mod, :wrap_response, 1) do
+            provider_mod.wrap_response(raw_data)
+          else
+            raw_data
+          end
 
-    # Call provider's decode_response pipeline step function directly
-    fake_request = %Req.Request{private: %{req_llm_model: model}}
-    fake_response = %Req.Response{body: wrapped_data, status: 200}
-    {_req, result} = provider_mod.decode_response({fake_request, fake_response})
+        # Construct minimal request/response structs to invoke provider's decode_response callback
+        # without an actual HTTP request (for manual decoding of saved/raw API responses)
+        fixture_request = %Req.Request{private: %{req_llm_model: model}}
+        fixture_response = %Req.Response{body: wrapped_data, status: 200}
+        {_req, result} = provider_mod.decode_response({fixture_request, fixture_response})
 
-    case result do
-      %Req.Response{body: %ReqLLM.Response{} = response} -> {:ok, response}
-      error -> {:error, error}
+        case result do
+          %Req.Response{body: %ReqLLM.Response{} = response} -> {:ok, response}
+          error -> {:error, error}
+        end
+
+      {:error, error} ->
+        {:error, error}
     end
   end
 
@@ -351,7 +380,7 @@ defmodule ReqLLM.Response do
   ## Parameters
 
     * `raw_data` - Raw provider streaming response data
-    * `model` - Model specification  
+    * `model` - Model specification
     * `schema` - Schema definition for validation
 
   ## Returns

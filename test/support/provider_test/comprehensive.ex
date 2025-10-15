@@ -2,15 +2,16 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
   @moduledoc """
   Comprehensive per-model provider tests.
 
-  Consolidates all provider capability testing into up to 8 focused tests per model:
+  Consolidates all provider capability testing into up to 9 focused tests per model:
   1. Basic generate_text (non-streaming)
   2. Streaming with system context + creative params
   3. Token limit constraints
   4. Usage metrics and cost calculations
   5. Tool calling - multi-tool selection
   6. Tool calling - no tool when inappropriate
-  7. Object generation (streaming) - only for models with :tool_call capability
-  8. Reasoning/thinking tokens - only for models with :reasoning capability
+  7. Object generation (non-streaming) - only for models with object generation support
+  8. Object generation (streaming) - only for models with object generation support
+  9. Reasoning/thinking tokens - only for models with :reasoning capability
 
   Tests use fixtures for fast, deterministic execution while supporting
   live API recording with REQ_LLM_FIXTURES_MODE=record.
@@ -36,6 +37,7 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
 
       import ExUnit.Case
       import ReqLLM.Context
+      import ReqLLM.Debug, only: [dbug: 2]
       import ReqLLM.Test.Helpers
 
       alias ReqLLM.Test.ModelMatrix
@@ -44,8 +46,6 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
       @moduletag provider: to_string(provider)
       @moduletag timeout: 180_000
 
-      defp debug?, do: System.get_env("REQ_LLM_DEBUG") in ["1", "true"]
-
       @provider provider
       @models ModelMatrix.models_for_provider(provider, operation: :text)
 
@@ -53,13 +53,16 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
         @model_spec model_spec
 
         describe "#{model_spec}" do
-          @tag category: :core
+          @describetag model: model_spec |> String.split(":", parts: 2) |> List.last()
+
+          @tag scenario: :basic
           test "basic generate_text (non-streaming)" do
             require Logger
 
-            if debug?() do
-              IO.puts("\n[Comprehensive] model_spec=#{@model_spec}, test=basic_generate")
-            end
+            dbug(
+              fn -> "\n[Comprehensive] model_spec=#{@model_spec}, test=basic_generate" end,
+              component: :test
+            )
 
             opts =
               reasoning_overlay(
@@ -76,13 +79,14 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
             |> assert_basic_response()
           end
 
-          @tag category: :streaming
+          @tag scenario: :streaming
           test "stream_text with system context and creative params" do
             require Logger
 
-            if debug?() do
-              IO.puts("\n[Comprehensive] model_spec=#{@model_spec}, test=streaming")
-            end
+            dbug(
+              fn -> "\n[Comprehensive] model_spec=#{@model_spec}, test=streaming" end,
+              component: :test
+            )
 
             context =
               ReqLLM.Context.new([
@@ -118,9 +122,17 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
                    "Expected text or thinking content, got empty (text: #{inspect(text)}, thinking: #{inspect(thinking)})"
 
             assert response.message.role == :assistant
+
+            usage = response.usage
+            assert is_map(usage)
+            assert is_number(usage.input_tokens) and usage.input_tokens > 0
+            assert is_number(usage.output_tokens) and usage.output_tokens >= 0
+            assert is_number(usage.total_tokens) and usage.total_tokens > 0
+            assert is_number(usage.cached_input) and usage.cached_input >= 0
+            assert is_number(usage.reasoning) and usage.reasoning >= 0
           end
 
-          @tag category: :core
+          @tag scenario: :token_limit
           test "token limit constraints" do
             opts =
               param_bundles(@provider).minimal
@@ -154,13 +166,14 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
             end
           end
 
-          @tag category: :usage
+          @tag scenario: :usage
           test "usage metrics and cost calculations" do
             require Logger
 
-            if debug?() do
-              IO.puts("\n[Comprehensive] model_spec=#{@model_spec}, test=usage")
-            end
+            dbug(
+              fn -> "\n[Comprehensive] model_spec=#{@model_spec}, test=usage" end,
+              component: :test
+            )
 
             max_tokens =
               case ReqLLM.Model.from(@model_spec) do
@@ -217,7 +230,7 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
           end
 
           if :tool_call in ReqLLM.capabilities(model_spec) do
-            @tag category: :tool_calling
+            @tag scenario: :tool_multi
             test "tool calling - multi-tool selection" do
               tools = [
                 ReqLLM.tool(
@@ -281,7 +294,57 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
               end
             end
 
-            @tag category: :tool_calling
+            @tag scenario: :tool_round_trip
+            test "tool calling - round trip execution" do
+              tools = [
+                ReqLLM.tool(
+                  name: "add",
+                  description: "Add two integers",
+                  parameter_schema: [
+                    a: [type: :integer, required: true],
+                    b: [type: :integer, required: true]
+                  ],
+                  callback: fn %{a: a, b: b} -> {:ok, a + b} end
+                )
+              ]
+
+              base_opts =
+                param_bundles().deterministic
+                |> Keyword.put(:max_tokens, tool_budget_for(@model_spec))
+
+              {:ok, resp1} =
+                ReqLLM.generate_text(
+                  @model_spec,
+                  "Use the add tool to compute 2 + 3. After the tool result arrives, respond with 'sum=<value>'.",
+                  fixture_opts(
+                    "tool_round_trip_1",
+                    base_opts ++
+                      [
+                        tools: tools,
+                        tool_choice: %{type: "tool", name: "add"}
+                      ]
+                  )
+                )
+
+              tool_calls = ReqLLM.Response.tool_calls(resp1)
+              assert length(tool_calls) >= 1
+
+              ctx2 = ReqLLM.Context.execute_and_append_tools(resp1.context, tool_calls, tools)
+
+              {:ok, resp2} =
+                ReqLLM.generate_text(
+                  @model_spec,
+                  ctx2,
+                  fixture_opts("tool_round_trip_2", base_opts)
+                )
+
+              text = ReqLLM.Response.text(resp2) || ""
+              assert text != ""
+              assert String.contains?(text, "5")
+              assert Enum.empty?(ReqLLM.Response.tool_calls(resp2))
+            end
+
+            @tag scenario: :tool_none
             test "tool calling - no tool when inappropriate" do
               tools = [
                 ReqLLM.tool(
@@ -314,8 +377,56 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
             end
           end
 
-          if :tool_call in ReqLLM.capabilities(model_spec) do
-            @tag category: :object_generation
+          if ReqLLM.Capability.supports_object_generation?(model_spec) do
+            @tag scenario: :object_basic
+            test "object generation (non-streaming)" do
+              schema = [
+                name: [type: :string, required: true, doc: "Person's full name"],
+                age: [type: :pos_integer, required: true, doc: "Person's age in years"],
+                occupation: [type: :string, doc: "Person's job or profession"]
+              ]
+
+              opts =
+                param_bundles(@provider).deterministic
+                |> Keyword.put(:max_tokens, 500)
+                |> then(&reasoning_overlay(@model_spec, @provider, &1, 500))
+
+              {:ok, response} =
+                ReqLLM.generate_object(
+                  @model_spec,
+                  "Generate a software engineer profile",
+                  schema,
+                  fixture_opts(@provider, "object_basic", opts)
+                )
+
+              assert %ReqLLM.Response{} = response
+              object = ReqLLM.Response.object(response)
+              rt = ReqLLM.Response.reasoning_tokens(response)
+
+              cond do
+                is_map(object) and map_size(object) > 0 ->
+                  assert Map.has_key?(object, "name")
+                  assert Map.has_key?(object, "age")
+                  assert is_binary(object["name"])
+                  assert object["name"] != ""
+                  assert is_integer(object["age"])
+                  assert object["age"] > 0
+
+                truncated?(response) ->
+                  assert is_number(rt) and rt >= 0
+
+                is_number(rt) and rt > 0 ->
+                  :ok
+
+                is_map(object) ->
+                  :ok
+
+                true ->
+                  flunk("Expected object or reasoning tokens but got: #{inspect(object)}")
+              end
+            end
+
+            @tag scenario: :object_streaming
             test "object generation (streaming)" do
               schema = [
                 name: [type: :string, required: true, doc: "Person's full name"],
@@ -372,11 +483,12 @@ defmodule ReqLLM.ProviderTest.Comprehensive do
           end
 
           if :reasoning in ReqLLM.capabilities(model_spec) do
-            @tag category: :reasoning
+            @tag scenario: :reasoning
             test "reasoning/thinking tokens (non-streaming + streaming)" do
-              if debug?() do
-                IO.puts("\n[Comprehensive] model_spec=#{@model_spec}, test=reasoning")
-              end
+              dbug(
+                fn -> "\n[Comprehensive] model_spec=#{@model_spec}, test=reasoning" end,
+                component: :test
+              )
 
               {:ok, model} = ReqLLM.Model.from(@model_spec)
 
